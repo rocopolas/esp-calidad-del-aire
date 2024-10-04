@@ -1,0 +1,35 @@
+.menu ul {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+.menu a {
+    display: block;
+    padding: 1em;
+    background-color: #08a1c7;
+    text-decoration: none;
+    color: #191C26;
+}
+.menu a:hover {
+    background-color: #036988;
+}
+.menu ul li ul {
+    display: none;
+}
+.menu ul li a:hover + ul, .menu ul li ul:hover {
+    display: block;
+}
+
+header {
+    background-color: #08a1c7;
+}
+
+a {
+    font-size:large;
+    font-family: monospace;
+}
+
+h1 {
+    font-family: monospace;
+}
