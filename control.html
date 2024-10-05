@@ -1,0 +1,66 @@
+<html>
+    <link rel="stylesheet" type="text/css" href="estilos.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <header>
+        <nav class="menu">
+            <ul>
+                <li><a href="#">Menu</a>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="control.html">Control</a></li>
+                        <li><a href="#3">Carpeta tecnica</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <h1>ESP CALIDAD DEL AIRE</h1>
+    </header>
+    <body>
+        <h1 class="titulo">Control</h1>
+        <p>Temperatura: TEMP01</p>
+        <p>Calidad del aire: CAL01</p>
+        <p>Estado ventiladores: VEN01</p>
+        <div>
+            <canvas id="grafico"></canvas>
+        </div>
+        <script>
+            const ctx = document.getElementById('grafico');
+          
+            new Chart(ctx, {
+              type: 'scatter',
+              data: {
+                labels: ['25 seg', '20 seg', '15 seg', '10 seg', '10 seg', '5 seg'],
+                datasets: [{
+                type: 'line',
+                  label: 'Calidad del aire',
+                  data: [12, 19, 3, 5, 2, 3],
+                  borderWidth: 1
+                },
+                {
+                  type: 'line',
+                  label: 'Temperatura',
+                  data: [10, 11, 15, 9, 11, 13],
+                  borderWidth: 1
+                },{
+                  type: 'bar',
+                  label: 'Estado ventiladores',
+                  data: [0, 20, 0, 20, 20, 0],
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+        </script>
+          
+    </body>
+    <footer>
+
+    </footer>
+</html>
