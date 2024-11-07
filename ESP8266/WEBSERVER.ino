@@ -9,7 +9,7 @@ const char* ssid = "LABO"; // Define el nombre de la red WiFi a la que se conect
 const char* password = ""; // Define la contraseña de la red WiFi.
 WebServer server(80); // Crea un objeto para el servidor web en el puerto 80.
 
-const int CDA = 27; //calidad del aire
+const int CDA = 34; //calidad del aire
 const int VEN = 4; //ventilador
 const int BUZ = 26;
 
@@ -40,6 +40,7 @@ void setup() {
   pinMode(VEN, OUTPUT); 
   pinMode(BUZ, OUTPUT); 
 
+  /*
   // Conexión a la red WiFi
   WiFi.begin(ssid, password); // Inicia la conexión a la red WiFi con el SSID y la contraseña especificados.
   while (WiFi.status() != WL_CONNECTED) { // Espera a que se establezca la conexión WiFi.
@@ -54,22 +55,23 @@ void setup() {
   server.on("/", HTTP_GET, handleRoot); // Asigna la función handleRoot a la ruta raíz.
   // Inicia el servidor web en el puerto 80
   server.begin(); // Comienza a escuchar en el puerto 80 para conexiones entrantes.
+  */
 }
 
 void loop() {
   server.handleClient(); // Maneja las solicitudes de los clientes que se conectan al servidor.
 
-  calidad_estado = digitalRead(CDA);
+  calidad_estado = analogRead(CDA) - 2900;
   temperatura_estado = dht.readTemperature();
   ventilador_estado = digitalRead(VEN);
   humedad_estado = dht.readHumidity();
 
-  if(calidad_estado > 900 || temperatura_estado > 45){
+  if(calidad_estado > 1000 || temperatura_estado > 45){
     digitalWrite(BUZ, HIGH);
-    // digitalWrite(VEN, HIGH);
+    digitalWrite(VEN, HIGH);
   } else {
     digitalWrite(BUZ, LOW);
-    // digitalWrite(VEN, LOW);
+    digitalWrite(VEN, LOW);
   }
 
   unsigned long currentMillis = millis();
@@ -86,6 +88,18 @@ void loop() {
     VEN_GRA[5] = ventilador_estado;
     TEM_GRA[5] = temperatura_estado;
     HUM_GRA[5]=  humedad_estado;
+
+    Serial.println("---------------------------");
+    Serial.print("GAS PPM: ");
+    Serial.println(calidad_estado);
+    Serial.print("Temperatura: ");
+    Serial.println(temperatura_estado);
+    Serial.print("Ventilador estado: ");
+    Serial.println(ventilador_estado);
+    Serial.print("Humedad: ");
+    Serial.print(humedad_estado);
+    Serial.println("%");
+    Serial.println("---------------------------");
 
   }
 
