@@ -39,7 +39,6 @@ const long interval = 5000;
 unsigned long previousMillis2 = 0; 
 const long interval2 = 1000;
 
-
 void setup() {
   Serial.begin(115200); // Inicia la comunicación serial a 115200 baudios.
 
@@ -120,7 +119,8 @@ void loop() {
     }
 
     if(calidad_estado < 0){CDA_GRA[5] = 1;}else{CDA_GRA[5] = calidad_estado;}
-    if(ventilador_estado == 1){VEN_GRA[5] = 100;}else{VEN_GRA[5] = 1;}
+
+    if(ventilador_estado != 0){VEN_GRA[5] = 100;}else{VEN_GRA[5] = 1;}
     TEM_GRA[5] = temperatura_estado;
     HUM_GRA[5]=  humedad_estado;
 
