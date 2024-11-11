@@ -39,6 +39,27 @@ const long interval = 5000;
 unsigned long previousMillis2 = 0; 
 const long interval2 = 1000;
 
+// 0 -> automatico
+// 1 -> manual
+int modo = 0;
+
+unsigned long ventiladorTimerStart = 0;  // Renombrar la variable a un nombre único
+unsigned long timerDuration = 0;
+bool ventiladorTemporizado = false;
+
+void startTimer() {
+  modo = 1;
+  String tiempoStr = server.arg("tiempo");  // Obtiene el tiempo en segundos
+  timerDuration = tiempoStr.toInt() * 1000;  // Convierte a milisegundos
+  ventiladorTemporizado = true;  // Activa el temporizador
+  digitalWrite(VEN, HIGH);  // Enciende el ventilador
+  ventiladorTimerStart = millis();  // Guarda el tiempo actual
+
+  String jsonResponse = "{\"status\": \"Temporizador activado\", \"tiempo\": \"" + String(tiempoStr) + "\"}";
+  server.send(200, "application/json", jsonResponse);  // Responde al cliente
+}
+
+
 void setup() {
   Serial.begin(115200); // Inicia la comunicación serial a 115200 baudios.
 
@@ -67,6 +88,10 @@ void setup() {
 
   // Configuración de las rutas del servidor web
   server.on("/", HTTP_GET, handleRoot); // Asigna la función handleRoot a la ruta raíz.
+  server.on("/toggleVentilador", HTTP_GET, toggleVentilador);
+  server.on("/startTimer", HTTP_GET, startTimer);
+
+
   // Inicia el servidor web en el puerto 80
   server.begin(); // Comienza a escuchar en el puerto 80 para conexiones entrantes.
   
@@ -81,27 +106,39 @@ void loop() {
   ventilador_estado = digitalRead(VEN);
   humedad_estado = dht.readHumidity();
 
+  // Verifica si el temporizador está activo y si ha pasado el tiempo
+  if (ventiladorTemporizado && (millis() - ventiladorTimerStart >= timerDuration)) {
+    modo = 0;
+    digitalWrite(VEN, LOW);  // Apaga el ventilador
+    ventiladorTemporizado = false;  // Desactiva el temporizador
+    Serial.println("Ventilador apagado automáticamente tras el temporizador.");
+  }
+
   unsigned long currentMillis2 = millis();
   if (currentMillis2 - previousMillis2 >= interval2) {
     previousMillis2 = currentMillis2;
     if(calidad_estado > 80){
       digitalWrite(BUZ, HIGH);
-      digitalWrite(VEN, HIGH);
-
+      if(modo == 0){
+        digitalWrite(VEN, HIGH);
+      }
+      
       digitalWrite(rojo, HIGH);
       digitalWrite(amarillo, LOW);
       digitalWrite(verde, LOW);
     } else if (calidad_estado > 30 && calidad_estado < 80) {
       digitalWrite(BUZ, LOW);
-      digitalWrite(VEN, LOW);
-
+      if(modo == 0){
+        digitalWrite(VEN, LOW);
+      }
       digitalWrite(rojo, LOW);
       digitalWrite(amarillo, HIGH);
       digitalWrite(verde, LOW);
     } else if (calidad_estado >= 0 && calidad_estado < 50){
       digitalWrite(BUZ, LOW);
-      digitalWrite(VEN, LOW);
-
+      if(modo == 0){
+        digitalWrite(VEN, LOW);
+      }
       digitalWrite(rojo, LOW);
       digitalWrite(amarillo, LOW);
       digitalWrite(verde, HIGH);
@@ -179,3 +216,24 @@ void handleRoot() {
 
   server.send(200, "text/html", Pagina); // Envía la página principal al cliente que hace la solicitud.
 }
+
+void toggleVentilador() {
+  static bool ventiladorEncendido = false; // Estado del ventilador
+
+  // Cambiar el estado del ventilador
+  ventiladorEncendido = !ventiladorEncendido;
+  
+  // Encender o apagar el ventilador
+  if (ventiladorEncendido) {
+    digitalWrite(VEN, HIGH);  // Encender el ventilador
+    modo = 1;
+  } else {
+    digitalWrite(VEN, LOW);   // Apagar el ventilador
+    modo = 0;
+  }
+
+  // Enviar una respuesta en formato JSON
+  String jsonResponse = "{\"ventilador\": " + String(ventiladorEncendido ? 1 : 0) + "}";
+  server.send(200, "application/json", jsonResponse);  // Responder con el estado del ventilador
+}
+
