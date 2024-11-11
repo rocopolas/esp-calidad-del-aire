@@ -5,17 +5,17 @@
 #include <DHT.h>		// importa la Librerias DHT
 #include <DHT_U.h>
 
-const char* ssid = "LABO"; // Define el nombre de la red WiFi a la que se conectará.
-const char* password = ""; // Define la contraseña de la red WiFi.
+const char* ssid = "LOL-2.4"; // Define el nombre de la red WiFi a la que se conectará.
+const char* password = "00425174082"; // Define la contraseña de la red WiFi.
 WebServer server(80); // Crea un objeto para el servidor web en el puerto 80.
 
 const int CDA = 32; //calidad del aire
 const int VEN = 4; //ventilador
 const int BUZ = 26;
 
-const int verde = 18;
+const int verde = 21;
 const int amarillo = 19;
-const int rojo = 21;
+const int rojo = 18;
 
 #define DHTPIN 25
 #define DHTTYPE DHT11
@@ -26,6 +26,7 @@ int calidad_estado;
 float temperatura_estado;
 int ventilador_estado;
 float humedad_estado;
+
 
 int CDA_GRA[6] = {0,0,0,0,0,0}; 
 int VEN_GRA[6] = {0,0,0,0,0,0}; 
@@ -54,7 +55,7 @@ void setup() {
 
   digitalWrite(VEN, LOW);
 
-  /*
+  
   // Conexión a la red WiFi
   WiFi.begin(ssid, password); // Inicia la conexión a la red WiFi con el SSID y la contraseña especificados.
   while (WiFi.status() != WL_CONNECTED) { // Espera a que se establezca la conexión WiFi.
@@ -69,7 +70,7 @@ void setup() {
   server.on("/", HTTP_GET, handleRoot); // Asigna la función handleRoot a la ruta raíz.
   // Inicia el servidor web en el puerto 80
   server.begin(); // Comienza a escuchar en el puerto 80 para conexiones entrantes.
-  */
+  
 }
 
 void loop() {
@@ -91,14 +92,14 @@ void loop() {
       digitalWrite(rojo, HIGH);
       digitalWrite(amarillo, LOW);
       digitalWrite(verde, LOW);
-    } else if (calidad_estado > 50 && calidad_estado < 80) {
+    } else if (calidad_estado > 30 && calidad_estado < 80) {
       digitalWrite(BUZ, LOW);
       digitalWrite(VEN, LOW);
 
       digitalWrite(rojo, LOW);
       digitalWrite(amarillo, HIGH);
       digitalWrite(verde, LOW);
-    } else if (calidad_estado > 0 && calidad_estado < 50){
+    } else if (calidad_estado >= 0 && calidad_estado < 50){
       digitalWrite(BUZ, LOW);
       digitalWrite(VEN, LOW);
 
@@ -117,8 +118,9 @@ void loop() {
       TEM_GRA[i] = TEM_GRA[i + 1];
       HUM_GRA[i] = HUM_GRA[i + 1];
     }
-    CDA_GRA[5] = calidad_estado;
-    VEN_GRA[5] = ventilador_estado;
+
+    if(calidad_estado < 0){CDA_GRA[5] = 1;}else{CDA_GRA[5] = calidad_estado;}
+    if(ventilador_estado == 1){VEN_GRA[5] = 100;}else{VEN_GRA[5] = 1;}
     TEM_GRA[5] = temperatura_estado;
     HUM_GRA[5]=  humedad_estado;
 
@@ -143,7 +145,7 @@ void handleRoot() {
   
   String Pagina = PAGINA_PRINCIPAL;
   Pagina.replace("TEMP01",String(temperatura_estado));
-  Pagina.replace("CAL01",String(calidad_estado));
+  if(calidad_estado < 0){Pagina.replace("CAL01",String(1));}else{Pagina.replace("CAL01",String(calidad_estado));}
   Pagina.replace("VEN01",String(ventilador_estado));
   Pagina.replace("HUM01",String(humedad_estado));
 
