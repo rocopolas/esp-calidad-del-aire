@@ -36,11 +36,19 @@ R"=====(
                 }]
               },
               options: {
+                animation: false,
                 scales: {
                   y: {
                     beginAtZero: true
                   }
                 }
               }
-            });</script></body><footer></footer></html>
+            });</script>
+            
+            <script>
+  setInterval(() => {
+    location.reload();
+  }, 5000); // Recarga la página cada 5 segundos
+</script>
+</body><footer></footer></html>
 )=====";
