@@ -74,7 +74,6 @@ void setup() {
   pinMode(amarillo, OUTPUT); 
 
   digitalWrite(VEN, LOW);
-
   
   // Conexión a la red WiFi
   WiFi.begin(ssid, password); // Inicia la conexión a la red WiFi con el SSID y la contraseña especificados.
