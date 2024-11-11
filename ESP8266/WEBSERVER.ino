@@ -9,9 +9,13 @@ const char* ssid = "LABO"; // Define el nombre de la red WiFi a la que se conect
 const char* password = ""; // Define la contraseña de la red WiFi.
 WebServer server(80); // Crea un objeto para el servidor web en el puerto 80.
 
-const int CDA = 34; //calidad del aire
+const int CDA = 32; //calidad del aire
 const int VEN = 4; //ventilador
 const int BUZ = 26;
+
+const int verde = 18;
+const int amarillo = 19;
+const int rojo = 21;
 
 #define DHTPIN 25
 #define DHTTYPE DHT11
@@ -31,6 +35,10 @@ int HUM_GRA[6] = {0,0,0,0,0,0};
 unsigned long previousMillis = 0; 
 const long interval = 5000;
 
+unsigned long previousMillis2 = 0; 
+const long interval2 = 1000;
+
+
 void setup() {
   Serial.begin(115200); // Inicia la comunicación serial a 115200 baudios.
 
@@ -39,6 +47,12 @@ void setup() {
   pinMode(CDA, INPUT); 
   pinMode(VEN, OUTPUT); 
   pinMode(BUZ, OUTPUT); 
+
+  pinMode(rojo, OUTPUT); 
+  pinMode(verde, OUTPUT); 
+  pinMode(amarillo, OUTPUT); 
+
+  digitalWrite(VEN, LOW);
 
   /*
   // Conexión a la red WiFi
@@ -61,19 +75,38 @@ void setup() {
 void loop() {
   server.handleClient(); // Maneja las solicitudes de los clientes que se conectan al servidor.
 
-  calidad_estado = analogRead(CDA) - 2900;
+  int calidad_estado1 = analogRead(CDA);
+  calidad_estado = map(calidad_estado1, 3000, 4096, 0, 100);
   temperatura_estado = dht.readTemperature();
   ventilador_estado = digitalRead(VEN);
   humedad_estado = dht.readHumidity();
 
-  if(calidad_estado > 1000 || temperatura_estado > 45){
-    digitalWrite(BUZ, HIGH);
-    digitalWrite(VEN, HIGH);
-  } else {
-    digitalWrite(BUZ, LOW);
-    digitalWrite(VEN, LOW);
-  }
+  unsigned long currentMillis2 = millis();
+  if (currentMillis2 - previousMillis2 >= interval2) {
+    previousMillis2 = currentMillis2;
+    if(calidad_estado > 80){
+      digitalWrite(BUZ, HIGH);
+      digitalWrite(VEN, HIGH);
 
+      digitalWrite(rojo, HIGH);
+      digitalWrite(amarillo, LOW);
+      digitalWrite(verde, LOW);
+    } else if (calidad_estado > 50 && calidad_estado < 80) {
+      digitalWrite(BUZ, LOW);
+      digitalWrite(VEN, LOW);
+
+      digitalWrite(rojo, LOW);
+      digitalWrite(amarillo, HIGH);
+      digitalWrite(verde, LOW);
+    } else if (calidad_estado > 0 && calidad_estado < 50){
+      digitalWrite(BUZ, LOW);
+      digitalWrite(VEN, LOW);
+
+      digitalWrite(rojo, LOW);
+      digitalWrite(amarillo, LOW);
+      digitalWrite(verde, HIGH);
+    }
+  }
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
@@ -92,6 +125,7 @@ void loop() {
     Serial.println("---------------------------");
     Serial.print("GAS PPM: ");
     Serial.println(calidad_estado);
+    Serial.println(calidad_estado1);
     Serial.print("Temperatura: ");
     Serial.println(temperatura_estado);
     Serial.print("Ventilador estado: ");
